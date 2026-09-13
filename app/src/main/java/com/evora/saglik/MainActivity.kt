@@ -101,12 +101,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun startStepService() {
-        val intent = Intent(this, StepCounterService::class.java)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ContextCompat.startForegroundService(this, intent)
+    /**
+     * Android 14+ (API 34) cihazlarda "health" tipi foreground servis başlatmak için
+     * ACTIVITY_RECOGNITION iznin alınmış olması ZORUNLUDUR; aksi halde sistem servisi
+     * başlatırken uygulamayı çökertir. Bu yüzden izin yoksa servisi hiç başlatmıyoruz.
+     */
+    private fun hasActivityRecognitionPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) ==
+                PackageManager.PERMISSION_GRANTED
         } else {
-            startService(intent)
+            true // Android 10 öncesinde bu izin sistemde yok
+        }
+    }
+
+    private fun startStepService() {
+        if (!hasActivityRecognitionPermission()) {
+            // İzin verilmediyse adım sayma servisini başlatmayı deneme (çökmeyi önler).
+            // Kullanıcı diğer sekmelerde (su, profil) uygulamayı sorunsuz kullanmaya devam eder.
+            return
+        }
+        try {
+            val intent = Intent(this, StepCounterService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                ContextCompat.startForegroundService(this, intent)
+            } else {
+                startService(intent)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }
