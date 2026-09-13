@@ -1,0 +1,41 @@
+name: Evora Sağlık APK Derle
+
+# main dalına her push yapıldığında VEYA Actions sekmesinden elle tetiklendiğinde çalışır
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodları indir
+        uses: actions/checkout@v4
+
+      - name: JDK 17 kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Android SDK kur
+        uses: android-actions/setup-android@v3
+
+      - name: gradlew'e çalıştırma izni ver (varsa)
+        run: chmod +x ./gradlew || true
+
+      - name: Debug APK derle
+        run: |
+          if [ -f "./gradlew" ]; then
+            ./gradlew assembleDebug --stacktrace
+          else
+            gradle assembleDebug --stacktrace
+          fi
+
+      - name: APK'yı yükle (Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: evora-saglik-debug-apk
+          path: app/build/outputs/apk/debug/*.apk

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#2E7D32</color>
+    <color name="primaryDark">#1B5E20</color>
+    <color name="waterBlue">#0288D1</color>
+    <color name="background">#F5F7F5</color>
+    <color name="cardBackground">#FFFFFF</color>
+    <color name="textPrimary">#1B1B1B</color>
+    <color name="textSecondary">#6B6B6B</color>
+    <color name="iconBackground">#FFFFFF</color>
+</resources>
