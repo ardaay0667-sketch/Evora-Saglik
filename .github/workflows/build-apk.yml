@@ -1,51 +1,52 @@
-name: Evora Sağlık APK Derle
+name: Evora Saglik APK Derle
 
 on:
   push:
-      branches: [ main, master ]
-        workflow_dispatch:
+      branches:
+            - main
+                  - master
+                    workflow_dispatch:
 
-        permissions:
-          contents: write
+                    permissions:
+                      contents: write
 
-          jobs:
-            build:
-                runs-on: ubuntu-latest
+                      jobs:
+                        build:
+                            runs-on: ubuntu-latest
+                                steps:
+                                      - name: Kodlari indir
+                                              uses: actions/checkout@v4
 
-                    steps:
-                          - name: Kodları indir
-                                  uses: actions/checkout@v4
+                                                    - name: JDK 17 kur
+                                                            uses: actions/setup-java@v4
+                                                                    with:
+                                                                              distribution: temurin
+                                                                                        java-version: "17"
 
-                                        - name: JDK 17 kur
-                                                uses: actions/setup-java@v4
-                                                        with:
-                                                                  distribution: 'temurin'
-                                                                            java-version: '17'
+                                                                                              - name: Android SDK kur
+                                                                                                      uses: android-actions/setup-android@v3
 
-                                                                                  - name: Android SDK kur
-                                                                                          uses: android-actions/setup-android@v3
+                                                                                                            - name: gradlew izni ver
+                                                                                                                    run: chmod +x ./gradlew || true
 
-                                                                                                - name: gradlew'e çalıştırma izni ver (varsa)
-                                                                                                        run: chmod +x ./gradlew || true
+                                                                                                                          - name: Debug APK derle
+                                                                                                                                  run: |
+                                                                                                                                            if [ -f "./gradlew" ]; then
+                                                                                                                                                        ./gradlew assembleDebug --stacktrace
+                                                                                                                                                                  else
+                                                                                                                                                                              gradle assembleDebug --stacktrace
+                                                                                                                                                                                        fi
 
-                                                                                                              - name: Debug APK derle
-                                                                                                                      run: |
-                                                                                                                                if [ -f "./gradlew" ]; then
-                                                                                                                                            ./gradlew assembleDebug --stacktrace
-                                                                                                                                                      else
-                                                                                                                                                                  gradle assembleDebug --stacktrace
-                                                                                                                                                                            fi
+                                                                                                                                                                                              - name: APK yukle Artifacts
+                                                                                                                                                                                                      uses: actions/upload-artifact@v4
+                                                                                                                                                                                                              with:
+                                                                                                                                                                                                                        name: evora-saglik-debug-apk
+                                                                                                                                                                                                                                  path: app/build/outputs/apk/debug/*.apk
 
-                                                                                                                                                                                  - name: APK'yı yükle (Artifacts)
-                                                                                                                                                                                          uses: actions/upload-artifact@v4
-                                                                                                                                                                                                  with:
-                                                                                                                                                                                                            name: evora-saglik-debug-apk
-                                                                                                                                                                                                                      path: app/build/outputs/apk/debug/*.apk
-
-                                                                                                                                                                                                                            - name: APK'yı Release olarak yayınla (kolay indirme için)
-                                                                                                                                                                                                                                    uses: softprops/action-gh-release@v2
-                                                                                                                                                                                                                                            with:
-                                                                                                                                                                                                                                                      tag_name: debug-latest
-                                                                                                                                                                                                                                                                name: "Evora Sağlık - Son Derleme"
-                                                                                                                                                                                                                                                                          body: "En güncel debug APK. Her push sonrası otomatik güncellenir."
-                                                                                                                                                                                                                                                                                    files: app/build/outputs/apk/debug/*.apk
+                                                                                                                                                                                                                                        - name: APK Release olarak yayinla
+                                                                                                                                                                                                                                                uses: softprops/action-gh-release@v2
+                                                                                                                                                                                                                                                        with:
+                                                                                                                                                                                                                                                                  tag_name: debug-latest
+                                                                                                                                                                                                                                                                            name: Evora Saglik Son Derleme
+                                                                                                                                                                                                                                                                                      body: En guncel debug APK, her push sonrasi otomatik guncellenir
+                                                                                                                                                                                                                                                                                                files: app/build/outputs/apk/debug/*.apk
